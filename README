@@ -1,0 +1,23 @@
+Rel is an exploration of the relational model and data analysis in Python.
+
+I'm starting off just bringing together code I had on my blog from various
+posts in 2005, initial focusing on implementing relations, a few relational
+operators and exploring functional dependency analysis.
+
+Still to come is broader support of the relational model, use of namedtuples,
+use of itertools, importers and exporters (including possible support for
+Django's fixtures format) and more utility functions I have scattered all
+over the place in various data analysis scripts I've written over the years.
+
+
+BLOG POSTS
+
+http://jtauber.com/blog/2005/11/09/relational_python/
+http://jtauber.com/blog/2005/11/10/relational_python:_basic_class_for_relations/
+http://jtauber.com/blog/2005/11/11/relational_python:_displaying_relations/
+http://jtauber.com/blog/2005/11/17/relational_python:_projection/
+http://jtauber.com/blog/2005/11/30/relational_python:_restrict/
+
+http://jtauber.com/blog/2005/05/26/finding_dependencies_in_tabular_data/
+http://jtauber.com/blog/2005/05/27/finding_dependencies_in_tabular_data,_part_2/
+
