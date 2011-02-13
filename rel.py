@@ -1,83 +1,82 @@
-class Rel:
-    
+class Rel(set):
+
     def __init__(self, record_class):
         self._record_class = record_class
-        self._records = set()
-    
+        super(Rel, self).__init__()
+
     def add(self, record=None, **kwargs):
         if record is None:
             record = self._record_class(**kwargs)
-        
-        self._records.add(record)
-    
+        super(Rel, self).add(record)
+
+    def restrict(self, restriction):
+        new_rel = type(self)(self._record_class)
+        for record in self:
+            if restriction(record):
+                new_rel.add(record)
+        return new_rel
+
+    def intersection(self, other_rel):
+        assert self._record_class._fields == other_rel._record_class._fields
+        new_rel = super(Rel, self).intersection(other_rel)
+        new_rel._record_class = self._record_class
+        return new_rel
+
+    def union(self, other_rel):
+        assert self._record_class._fields == other_rel._record_class._fields
+        new_rel = super(Rel, self).union(other_rel)
+        new_rel._record_class = self._record_class
+        return new_rel
+
+    def rename(self, **mapping):
+        new_fields = tuple(mapping.get(field, field) for field in self._fields)
+        new_rel = type(self)(Record(*new_fields))
+        for record in self:
+            new_rel.add(new_rel._record_class(*record))
+        return new_rel
+
+    def project(self, projection):
+        assert set(projection).issubset(self._record_class._fields)
+        new_rel = type(self)(Record(*projection))
+        for record in self:
+            new_rel.add(**dict((field, getattr(record, field)) for field in projection))
+        return new_rel
+
     def display(self):
-            """
-            display the relation in tabular form.
-            """
-            
-            # if it seems inefficient that display uses self.tuples() rather than
-            # self.tuples_, it is because that way it will work on views where
-            # tuples() is dynamic
-            
-            columns = range(len(self._record_class._fields))
-            
-            col_width = [len(self._record_class._fields[col]) for col in columns]
-            
-            for record in self._records:
-                for col in columns:
-                    col_width[col] = max(col_width[col], len(record._asdict()[self._record_class._fields[col]]))
-            
-            hline = ""
+        """
+        Display the relation in tabular form.
+        """
+
+        # if it seems inefficient that display uses self.tuples() rather than
+        # self.tuples_, it is because that way it will work on views where
+        # tuples() is dynamic
+
+        columns = range(len(self._record_class._fields))
+
+        col_width = [len(self._record_class._fields[col]) for col in columns]
+
+        for record in self:
             for col in columns:
-                hline += "+-" + ("-" * col_width[col]) + "-"
-            hline += "+"
-            
-            def line(row):
-                l = ""
-                for col in columns:
-                    value = row[col]
-                    l += "| " + value + (" " * (col_width[col] - len(value))) + " "
-                l += "|"
-                return l
-            
-            print hline
-            print line(self._record_class._fields)
-            print hline
-            
-            for record in self._records:
-                print line([record._asdict()[self._record_class._fields[col]] for col in columns])
-            
-            print hline
+                col_width[col] = max(col_width[col], len(record._asdict()[self._record_class._fields[col]]))
 
+        hline = ""
+        for col in columns:
+            hline += "+-" + ("-" * col_width[col]) + "-"
+        hline += "+"
 
-def RESTRICT(orig_rel, restriction):
-    new_rel = Rel(orig_rel._record_class)
-    for record in orig_rel._records:
-        if restriction(record):
-            new_rel.add(record)
-    return new_rel
+        def line(row):
+            l = ""
+            for col in columns:
+                value = row[col]
+                l += "| " + value + (" " * (col_width[col] - len(value))) + " "
+            l += "|"
+            return l
 
+        print hline
+        print line(self._record_class._fields)
+        print hline
 
-def INTERSECT(rel_1, rel_2):
-    assert rel_1._record_class == rel_2._record_class
-    new_rel = Rel(rel_1._record_class)
-    for record in rel_1._records.intersection(rel_2._records):
-        new_rel.add(record)
-    return new_rel
+        for record in self:
+            print line([record._asdict()[self._record_class._fields[col]] for col in columns])
 
-
-def UNION(rel_1, rel_2):
-    assert rel_1._record_class == rel_2._record_class
-    new_rel = Rel(rel_1._record_class)
-    for record in rel_1._records.union(rel_2._records):
-        new_rel.add(record)
-    return new_rel
-
-
-def PROJECT(rel, fields):
-    assert set(fields).issubset(set(rel._record_class._fields))
-    new_rel = Rel(Record(fields))
-    for record in rel._records:
-        new_record = dict((field, getattr(record, field)) for field in fields)
-        new_rel.add(**new_record)
-    return new_rel
+        print hline

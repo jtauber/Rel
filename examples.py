@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 from urecord import Record
-from rel import Rel, RESTRICT, INTERSECT, UNION
+from rel import Rel
 
 
 class Department(Record("DNO", "DNAME", "BUDGET")):
@@ -48,14 +48,14 @@ emp2.display()
 
 print
 print "RESTRICT"
-RESTRICT(emp, lambda record: record.SALARY <= "40K").display()
+emp.restrict(lambda record: record.SALARY <= "40K").display()
 
 
 print
 print "INTERSECT"
-INTERSECT(emp, emp2).display()
+emp.intersection(emp2).display()
 
 
 print
 print "UNION"
-UNION(emp, emp2).display()
+emp.union(emp2).display()
