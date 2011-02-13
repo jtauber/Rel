@@ -72,3 +72,12 @@ def UNION(rel_1, rel_2):
     for record in rel_1._records.union(rel_2._records):
         new_rel.add(record)
     return new_rel
+
+
+def PROJECT(rel, fields):
+    assert set(fields).issubset(set(rel._record_class._fields))
+    new_rel = Rel(Record(fields))
+    for record in rel._records:
+        new_record = dict((field, getattr(record, field)) for field in fields)
+        new_rel.add(**new_record)
+    return new_rel
