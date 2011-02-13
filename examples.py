@@ -39,7 +39,9 @@ emp2.add(ENO="E4", ENAME="Saito", DNO="D2", SALARY="35K")
 
 
 dept.display()
+print
 emp.display()
+print
 emp2.display()
 
 
