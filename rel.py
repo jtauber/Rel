@@ -1,3 +1,18 @@
+from functools import wraps
+
+
+def union_compatible(method):
+    """Declare a set operation as requiring union-compatibility."""
+
+    @wraps(method)
+    def wrapper(self, other_rel):
+        assert self._record_class._fields == other_rel._record_class._fields
+        result = method(self, other_rel)
+        result._record_class = self._record_class
+        return result
+    return wrapper
+
+
 class Rel(set):
 
     def __init__(self, record_class):
@@ -16,17 +31,8 @@ class Rel(set):
                 new_rel.add(record)
         return new_rel
 
-    def intersection(self, other_rel):
-        assert self._record_class._fields == other_rel._record_class._fields
-        new_rel = super(Rel, self).intersection(other_rel)
-        new_rel._record_class = self._record_class
-        return new_rel
-
-    def union(self, other_rel):
-        assert self._record_class._fields == other_rel._record_class._fields
-        new_rel = super(Rel, self).union(other_rel)
-        new_rel._record_class = self._record_class
-        return new_rel
+    intersection = union_compatible(set.intersection)
+    union = union_compatible(set.union)
 
     def rename(self, **mapping):
         new_fields = tuple(mapping.get(field, field) for field in self._fields)
