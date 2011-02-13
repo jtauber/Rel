@@ -1,4 +1,4 @@
-from functools import wraps
+from functools import update_wrapper
 
 import exchequer
 from urecord import Record
@@ -7,12 +7,15 @@ from urecord import Record
 def union_compatible(method):
     """Declare a set operation as requiring union-compatibility."""
 
-    @wraps(method)
     def wrapper(self, other_rel):
         assert self._record_class._fields == other_rel._record_class._fields
         result = method(self, other_rel)
         result._record_class = self._record_class
         return result
+    try:
+        update_wrapper(wrapper, method)
+    except Exception:
+        pass
     return wrapper
 
 
