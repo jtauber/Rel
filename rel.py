@@ -1,5 +1,8 @@
 from functools import wraps
 
+import exchequer
+from urecord import Record
+
 
 def union_compatible(method):
     """Declare a set operation as requiring union-compatibility."""
@@ -48,41 +51,15 @@ class Rel(set):
             new_rel.add(**dict((field, getattr(record, field)) for field in projection))
         return new_rel
 
-    def display(self):
+    def display(self, outfile=None, encoding='utf-8'):
         """
         Display the relation in tabular form.
+
+        This method uses Exchequer (http://zacharyvoase.github.com/exchequer/)
+        to format the output table. Pass `outfile` if you want to write to
+        another file-like object (such as stderr or a StringIO). `encoding`
+        will be used when handling bytestrings in your records.
         """
 
-        # if it seems inefficient that display uses self.tuples() rather than
-        # self.tuples_, it is because that way it will work on views where
-        # tuples() is dynamic
-
-        columns = range(len(self._record_class._fields))
-
-        col_width = [len(self._record_class._fields[col]) for col in columns]
-
-        for record in self:
-            for col in columns:
-                col_width[col] = max(col_width[col], len(record._asdict()[self._record_class._fields[col]]))
-
-        hline = ""
-        for col in columns:
-            hline += "+-" + ("-" * col_width[col]) + "-"
-        hline += "+"
-
-        def line(row):
-            l = ""
-            for col in columns:
-                value = row[col]
-                l += "| " + value + (" " * (col_width[col] - len(value))) + " "
-            l += "|"
-            return l
-
-        print hline
-        print line(self._record_class._fields)
-        print hline
-
-        for record in self:
-            print line([record._asdict()[self._record_class._fields[col]] for col in columns])
-
-        print hline
+        exchequer.print_table([self._record_class._fields] + list(self),
+                outfile=outfile, encoding=encoding)
